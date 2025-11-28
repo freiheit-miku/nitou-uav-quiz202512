@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二等無人航空機操縦士 学科試験練習問題</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .quiz-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .question-card {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+        }
+        
+        .question-card.answered {
+            border-color: #667eea;
+        }
+        
+        .question-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .question-text {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .option input[type="radio"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 15px;
+        }
+        
+        .option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .explanation.show {
+            display: block;
+        }
+        
+        .explanation-title {
+            font-weight: bold;
+            color: #2196F3;
+            margin-bottom: 8px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .reset-btn {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background: #5a6268;
+        }
+        
+        .result {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        
+        .result p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚁 二等無人航空機操縦士 学科試験練習問題</h1>
+            <p>用語理解に特化した三択クイズ（40問）</p>
+        </div>
+
+        <div class="content">
+            <div class="quiz-info">
+                <strong>📋 試験情報:</strong><br>
+                全40問 | 各問2.5点 | 合格基準: 80点以上(32問以上正解)
+            </div>
+            
+            <div id="questions"></div>
+            
+            <div class="button-group">
+                <button class="submit-btn" id="submitBtn">採点する</button>
+                <button class="reset-btn" id="resetBtn">リセット</button>
+            </div>
+            
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+
+<script>
+    const questions = [
+        // ■ 操縦・飛行モード系
+        {
+            question: "ATTIモードの正しい特徴はどれ？",
+            options: [
+                "GPSで位置保持する",
+                "風に流されるが姿勢は制御される",
+                "自動帰還する"
+            ],
+            correct: 1,
+            explanation: "ATTIモードは姿勢は保つが位置は保持しないため、風に流されやすく安全管理が重要です。"
+        },
+        {
+            question: "GPSロスト時に起こりやすい現象はどれ？",
+            options: [
+                "機体がその場で静止する",
+                "操縦不能になり必ず墜落する",
+                "位置保持できず風に流される"
+            ],
+            correct: 2,
+            explanation: "GPSロストでは位置保持ができず、風に流されやすくなるため早期の対応が必要です。"
+        },
+        {
+            question: "IMUが主に担当する役割はどれ？",
+            options: [
+                "画像伝送",
+                "姿勢制御・姿勢推定",
+                "バッテリー残量の監視"
+            ],
+            correct: 1,
+            explanation: "IMUは加速度センサやジャイロセンサで姿勢を推定し、機体の姿勢制御の要となります。"
+        },
+        {
+            question: "フレネルゾーンが障害物で遮られるとどうなる？",
+            options: [
+                "飛行時間が伸びる",
+                "電波品質が低下し通信が不安定になる",
+                "プロペラ回転が速くなる"
+            ],
+            correct: 1,
+            explanation: "フレネルゾーンは電波の“通り道”であり、障害物が入ると通信が乱れやすくなります。"
+        },
+        {
+            question: "フェールセーフとは何を指す？",
+            options: [
+                "電波が強くなる機能",
+                "異常時に安全側に動作させる仕組み",
+                "飛行速度を速くする制御"
+            ],
+            correct: 1,
+            explanation: "フェールセーフは通信断などの異常時に自動帰還や自動着陸など安全側に制御する仕組みです。"
+        },
+
+        // ■ 法規・特定飛行・資格系
+        {
+            question: "目視外飛行の正しい定義はどれ？",
+            options: [
+                "操縦者がモニター映像だけで飛行させる",
+                "双眼鏡で見ていれば目視内飛行である",
+                "機体が見えなくても補助者がいれば目視内飛行である"
+            ],
+            correct: 0,
+            explanation: "モニター映像など、直接目で機体を確認しない飛行は目視外飛行に該当します。"
+        },
+        {
+            question: "目視内飛行の条件として正しいものは？",
+            options: [
+                "機体の位置と姿勢を肉眼で常時確認できる",
+                "双眼鏡で見えれば良い",
+                "プロペラ音が聞こえれば良い"
+            ],
+            correct: 0,
+            explanation: "目視内飛行は、操縦者が肉眼で機体の位置・姿勢を直接確認できる状態であることが条件です。"
+        },
+        {
+            question: "無人航空機操縦者技能証明（二等）が主に必要となる飛行区分は？",
+            options: [
+                "カテゴリーⅠ飛行",
+                "カテゴリーⅡ飛行",
+                "カテゴリーⅢ飛行のみ"
+            ],
+            correct: 1,
+            explanation: "二等技能証明はカテゴリーⅡ飛行を安全に行うための資格として位置付けられています。"
+        },
+        {
+            question: "特定飛行に該当する代表的な例はどれ？",
+            options: [
+                "人口集中地区上空での飛行",
+                "屋内での飛行",
+                "人が全くいない海上での目視内飛行"
+            ],
+            correct: 0,
+            explanation: "人口集中地区上空での飛行は特定飛行であり、許可・承認が必要です。"
+        },
+        {
+            question: "補助者の主な役割として正しいのはどれ？",
+            options: [
+                "操縦者の代わりに操縦する",
+                "機体の監視や第三者の安全確保を行う",
+                "バッテリー充電のみを担当する"
+            ],
+            correct: 1,
+            explanation: "補助者は機体や周囲を監視し、操縦者を補助して安全を確保する重要な役割を持ちます。"
+        },
+
+        // ■ 電波・通信・測位
+        {
+            question: "DGPSの特徴として正しいものは？",
+            options: [
+                "GPS信号を補正して測位精度を高める",
+                "距離が短くなる",
+                "風の影響を受けない"
+            ],
+            correct: 0,
+            explanation: "DGPSは基準局による補正情報でGPSの誤差を小さくし、測位精度を向上させます。"
+        },
+        {
+            question: "RTK方式の利点はどれ？",
+            options: [
+                "バッテリー寿命が伸びる",
+                "センチメートル級の高精度測位が可能",
+                "プロペラ騒音が小さくなる"
+            ],
+            correct: 1,
+            explanation: "RTKはリアルタイムで誤差補正を行い、センチ級の位置精度を実現します。"
+        },
+        {
+            question: "電波障害が発生しやすい場所として最も適切なのは？",
+            options: [
+                "湖の上",
+                "基地局や高圧線付近",
+                "田んぼ"
+            ],
+            correct: 1,
+            explanation: "基地局や高圧線など強い電波やノイズ源がある場所では電波障害が起こりやすくなります。"
+        },
+        {
+            question: "CCWの意味として正しいものは？",
+            options: [
+                "時計回り",
+                "反時計回り",
+                "上向き回転"
+            ],
+            correct: 1,
+            explanation: "CCWはCounter ClockWiseの略で、反時計回りを意味します。"
+        },
+        {
+            question: "通信ロスト時に発生するべき動作として適切なのは？",
+            options: [
+                "自動的にATTIモードへ移行する",
+                "フェールセーフが作動し、安全な動作に移る",
+                "操縦者が必ず手動で着陸させる"
+            ],
+            correct: 1,
+            explanation: "通信ロスト時はフェールセーフにより自動帰還や自動着陸など安全側に制御されることが望まれます。"
+        },
+
+        // ■ 機体構造・操作
+        {
+            question: "エルロンが担当する運動はどれ？",
+            options: [
+                "ヨー（左右の首振り）",
+                "ロール（左右の傾き）",
+                "ピッチ（上下の首振り）"
+            ],
+            correct: 1,
+            explanation: "エルロンは主翼の補助翼で、機体のロール運動を制御します。"
+        },
+        {
+            question: "エレベーターが担当する運動はどれ？",
+            options: [
+                "ピッチ（上下の首振り）",
+                "ロール（左右の傾き）",
+                "ヨー（左右の首振り）"
+            ],
+            correct: 0,
+            explanation: "エレベーターは昇降舵で、機首の上下（ピッチ）を制御します。"
+        },
+        {
+            question: "ラダーが担当する運動はどれ？",
+            options: [
+                "ピッチ（上下の首振り）",
+                "ヨー（左右の首振り）",
+                "ロール（左右の傾き）"
+            ],
+            correct: 1,
+            explanation: "ラダーは方向舵で、機体のヨー方向（左右の首振り）を制御します。"
+        },
+        {
+            question: "バンク角が大きくなると何が必要になる？",
+            options: [
+                "より大きな揚力",
+                "風速の増加",
+                "プロペラの逆回転"
+            ],
+            correct: 0,
+            explanation: "バンク角が大きいと重力の一部を支えるため、より大きな揚力が必要となります。"
+        },
+        {
+            question: "推力の説明として正しいものはどれ？",
+            options: [
+                "揚力のこと",
+                "前進または上昇のための力",
+                "抗力のこと"
+            ],
+            correct: 1,
+            explanation: "推力は機体を前進・上昇させる方向に働く力です。"
+        },
+
+        // ■ 気象・風・危険要素
+        {
+            question: "風向とは何を表すか？",
+            options: [
+                "風が吹き抜ける方向",
+                "風が吹いてくる方向",
+                "操縦者が向いている方向"
+            ],
+            correct: 1,
+            explanation: "風向は風が“どの方向から”吹いてくるかを表します。"
+        },
+        {
+            question: "地面効果とはどのような現象か？",
+            options: [
+                "地面に近いほど揚力が増える",
+                "地面が温まる現象",
+                "バッテリーが長持ちする現象"
+            ],
+            correct: 0,
+            explanation: "地面付近では渦の影響が減り揚力が増すため、浮きやすくなる現象が地面効果です。"
+        },
+        {
+            question: "最大離陸重量（MTOW）を超えて飛行するとどうなる可能性が高いか？",
+            options: [
+                "安全性が上がる",
+                "性能低下や墜落リスクが高まる",
+                "飛行時間が延びる"
+            ],
+            correct: 1,
+            explanation: "MTOW超過は機体性能を大きく低下させ、墜落リスクを高めるため厳禁です。"
+        },
+        {
+            question: "風速制限についての考え方として適切なのは？",
+            options: [
+                "操縦者の感覚で決める",
+                "メーカーが定める最大風速以内で運用する",
+                "GPS精度だけで判断する"
+            ],
+            correct: 1,
+            explanation: "安全な風速の上限はメーカーが指定しており、それを超えて飛行してはいけません。"
+        },
+        {
+            question: "ヒューマンエラーの例として最も適切なのは？",
+            options: [
+                "突風の発生",
+                "操縦者が制限高度を誤認して飛行した",
+                "鳥との衝突"
+            ],
+            correct: 1,
+            explanation: "操縦者の判断ミスや操作ミスはヒューマンエラーの代表例です。"
+        },
+
+        // ■ バッテリー・安全管理
+        {
+            question: "過放電のリスクとして正しいものは？",
+            options: [
+                "飛行時間が伸びる",
+                "バッテリー寿命が著しく低下する",
+                "映像が少し乱れるだけ"
+            ],
+            correct: 1,
+            explanation: "リポバッテリーの過放電は劣化や膨張、最悪発火など重大なリスクにつながります。"
+        },
+        {
+            question: "バッテリーが膨張している場合の対応として適切なのは？",
+            options: [
+                "すぐ充電して様子を見る",
+                "使用を中止し適切に廃棄する",
+                "低温で保管すれば問題ない"
+            ],
+            correct: 1,
+            explanation: "膨張したバッテリーは危険な状態であり、使用を中止し適切な方法で廃棄する必要があります。"
+        },
+        {
+            question: "リチウムポリマー電池の取り扱いで注意すべき点は？",
+            options: [
+                "高温で長期保管すると良い",
+                "衝撃や過充電・過放電により発火リスクがある",
+                "完全放電を繰り返すと長持ちする"
+            ],
+            correct: 1,
+            explanation: "リポバッテリーは衝撃・過充電・過放電に弱く、最悪の場合発火するため慎重な管理が必要です。"
+        },
+        {
+            question: "飛行可能時間に最も影響する要素はどれ？",
+            options: [
+                "プロペラの色",
+                "バッテリー容量と消費電力",
+                "送信機のデザイン"
+            ],
+            correct: 1,
+            explanation: "バッテリー容量と機体の消費電力が飛行可能時間をほぼ決めます。"
+        },
+        {
+            question: "低温環境での飛行時に注意すべき代表的な現象は？",
+            options: [
+                "電圧低下により突然の出力低下・降下が起こる",
+                "必ずGPSが途切れる",
+                "プロペラが停止しやすくなる"
+            ],
+            correct: 0,
+            explanation: "低温では電池電圧が下がりやすく、残量が急激に減ることで突然降下することがあります。"
+        },
+
+        // ■ 運航・手順・管理系
+        {
+            question: "飛行経路の計画で最も優先すべき観点はどれ？",
+            options: [
+                "最短距離になること",
+                "安全性が確保されていること",
+                "景色が良いこと"
+            ],
+            correct: 1,
+            explanation: "飛行計画では第三者や物件へのリスクを最小にする安全性が最優先です。"
+        },
+        {
+            question: "SOP（標準作業手順）が特に重要となる飛行区分は？",
+            options: [
+                "カテゴリーⅠ",
+                "カテゴリーⅡBやⅢのような高リスク飛行",
+                "屋内のホビーフライト"
+            ],
+            correct: 1,
+            explanation: "リスクの高いカテゴリーⅡB・Ⅲでは、標準作業手順を整備し、その通り運用することが求められます。"
+        },
+        {
+            question: "リスクアセスメントの目的として正しいものは？",
+            options: [
+                "飛行時間を最大化する",
+                "危険要因を洗い出し、リスクを評価・低減する",
+                "映像の画質を良くする"
+            ],
+            correct: 1,
+            explanation: "リスクアセスメントはハザードの抽出とリスク評価・対策を行い、安全レベルを高めることが目的です。"
+        },
+        {
+            question: "運航管理者の主な役割として正しいものは？",
+            options: [
+                "レベル4運航などの全体管理・安全統括を行う",
+                "プロペラの洗浄のみを行う",
+                "照明設備のオンオフを行う"
+            ],
+            correct: 0,
+            explanation: "運航管理者は運航全体の安全を統括する立場であり、レベル4運航では特に重要な役割を担います。"
+        },
+        {
+            question: "補助者との連携で最も重要な点はどれ？",
+            options: [
+                "私服ではなく制服を着ること",
+                "指示系統や役割分担を明確にしておくこと",
+                "無線機は使わずジェスチャーだけで伝えること"
+            ],
+            correct: 1,
+            explanation: "誰が何を判断し、どのように伝えるかを明確化しておくことで、安全な連携が可能になります。"
+        },
+
+        // ■ その他・基礎
+        {
+            question: "オクトコプターの利点として最も適切なのは？",
+            options: [
+                "冗長性が高く、1つのモーター故障でも持ちこたえやすい",
+                "常に不安定である",
+                "プロペラが2つしかない"
+            ],
+            correct: 0,
+            explanation: "オクトコプターはローター数が多く、モーター故障時でも姿勢を維持できる可能性が高い冗長性が利点です。"
+        },
+        {
+            question: "特定飛行の代表例として最も適切なのは？",
+            options: [
+                "夜間飛行",
+                "昼間の人が全くいない草地での飛行",
+                "屋内体育館での飛行"
+            ],
+            correct: 0,
+            explanation: "夜間飛行は航空法上の特定飛行に含まれ、承認や各種条件が必要です。"
+        },
+        {
+            question: "送信機（プロポ）はどの法律の規制対象になるか？",
+            options: [
+                "道路交通法",
+                "電波法",
+                "消防法"
+            ],
+            correct: 1,
+            explanation: "送信機は電波を発する無線設備であり、電波法に基づく技術基準等の規制を受けます。"
+        },
+        {
+            question: "DIPS2.0で主に行う手続きはどれ？",
+            options: [
+                "気象観測",
+                "飛行許可・承認申請や飛行計画通報",
+                "映像編集"
+            ],
+            correct: 1,
+            explanation: "DIPS2.0は無人航空機の許可・承認申請や飛行計画の通報などを行う国土交通省のシステムです。"
+        }
+    ];
+
+    let userAnswers = {};
+    
+    function renderQuestions() {
+        const container = document.getElementById('questions');
+        container.innerHTML = '';
+        
+        questions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-card';
+            questionDiv.id = `question-${index}`;
+            
+            let optionsHTML = '';
+            q.options.forEach((option, optIndex) => {
+                optionsHTML += `
+                    <div class="option" onclick="selectOption(${index}, ${optIndex})">
+                        <input type="radio" name="q${index}" id="q${index}_${optIndex}" value="${optIndex}">
+                        <label for="q${index}_${optIndex}">${option}</label>
+                    </div>
+                `;
+            });
+            
+            questionDiv.innerHTML = `
+                <div class="question-number">問題 ${index + 1}</div>
+                <div class="question-text">${q.question}</div>
+                <div class="options">${optionsHTML}</div>
+                <div class="explanation" id="explanation-${index}">
+                    <div class="explanation-title">💡 解説</div>
+                    <div>${q.explanation}</div>
+                </div>
+            `;
+            
+            container.appendChild(questionDiv);
+        });
+    }
+    
+    function selectOption(questionIndex, optionIndex) {
+        userAnswers[questionIndex] = optionIndex;
+        const questionCard = document.getElementById(`question-${questionIndex}`);
+        questionCard.classList.add('answered');
+        
+        const radios = document.querySelectorAll(`input[name="q${questionIndex}"]`);
+        radios.forEach(radio => radio.checked = false);
+        document.getElementById(`q${questionIndex}_${optionIndex}`).checked = true;
+    }
+    
+    function submitQuiz() {
+        if (Object.keys(userAnswers).length < questions.length) {
+            alert('すべての問題に回答してください。');
+            return;
+        }
+        
+        let correctCount = 0;
+        
+        questions.forEach((q, index) => {
+            const userAnswer = userAnswers[index];
+            const options = document.querySelectorAll(`#question-${index} .option`);
+            
+            options.forEach((option, optIndex) => {
+                if (optIndex === q.correct) {
+                    option.classList.add('correct');
+                }
+                if (optIndex === userAnswer && userAnswer !== q.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            if (userAnswer === q.correct) {
+                correctCount++;
+            }
+            
+            document.getElementById(`explanation-${index}`).classList.add('show');
+        });
+        
+        const score = (correctCount / questions.length) * 100;
+        const passed = score >= 80;
+        
+        const resultDiv = document.getElementById('result');
+        resultDiv.className = 'result show';
+        resultDiv.style.background = passed 
+            ? 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)' 
+            : 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)';
+        
+        resultDiv.innerHTML = `
+            <h2>${passed ? '🎉 合格！' : '📚 不合格'}</h2>
+            <div class="score">${Math.round(score)}点</div>
+            <p>正解数: ${correctCount} / ${questions.length}</p>
+            <p>${passed ? 'かなり仕上がってます！本番形式の問題にもチャレンジしましょう。' : '用語をもう一度見直して、再チャレンジしてください。'}</p>
+        `;
+        
+        document.getElementById('submitBtn').disabled = true;
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+    
+    function resetQuiz() {
+        userAnswers = {};
+        renderQuestions();
+        document.getElementById('result').classList.remove('show');
+        document.getElementById('submitBtn').disabled = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    document.getElementById('submitBtn').addEventListener('click', submitQuiz);
+    document.getElementById('resetBtn').addEventListener('click', resetQuiz);
+    
+    renderQuestions();
+</script>
+</body>
+</html>
